@@ -1,0 +1,62 @@
+# Only kind deployment will have apps/v1 in apiVersion because that's where deployment resources live.
+#   Pod and Service will only be using V1 apiVersion.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-html-deployment
+  labels:
+    app.kubernetes.io/name: nginx-html-deployment
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/instance: nginx-example
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: nginx-html-deployment  # Must match service spec selector name.
+  template:
+    metadata:
+      labels:
+        run: nginx-html-deployment  # Must match spec containers name.
+    spec:
+      containers:
+      - name: nginx-html  # Must match template metadata labels app.
+        image: carmax-docker-local.jfrog.io/nginx-html:v1.1
+#        image: carmax-docker-local.jfrog.io/nginx-html:v1.2
+        ports:
+        - containerPort: 8000  # This will need to match the EXPOSE port in Dockerfile
+        imagePullPolicy: Always
+      imagePullSecrets:
+        - name: deploy-token
+
+---
+apiVersion: v1
+# Kind of service is designated within spec below (ClusterIP (Default if not specified), NodePort, Loadbalancer, ExternalName)
+#  Note: LoadBalancer service will auto-assign an external IP.
+kind: Service
+metadata:
+  name: nginx-loadbalancer
+  #labels:
+  #  run: nginx-html-deployment
+  annotations:
+    #  Internal Load Balancer: https://learn.microsoft.com/en-us/azure/aks/internal-lb?tabs=set-service-annotations
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  selector:
+#    app.kubernetes.io/run: nginx-html  # This must match deployment spec selector matchLabels app.
+#    run: my-nginx  # This must match deployment spec selector matchLabels app.
+    run: nginx-html-deployment  # This must match deployment spec selector matchLabels app.
+  type: LoadBalancer
+  ports:
+    # Multi-port service is used below. This is best practice and standard when deploying kubernetes applications.
+    - name: http
+      protocol: TCP
+      # By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+      port: 80
+#      targetPort: 81  # This is for demonstration, you can assign target port to whatever your service desires
+      targetPort: 8000  # This is development port, you can assign target port as needed
+#    - name: https
+#      protocol: TCP
+#      By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+#      port: 443
+#      targetPort: 443  # This is for demonstration, you can assign target port to whatever your service desires
