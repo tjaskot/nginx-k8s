@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+#  YOU WILL NOT USE KIND POD IN PRACTICE, THIS IS FOR PLAYGROUND AND LEARNING PURPOSES ONLY.
+#    Use kind Deployment. Refer to deploy-app-and-service.yml for production kustomize deployment manifest.
+#    Example Deployment kind commented below for reference.
+kind: Pod
+metadata:
+  name: nginx-html
+  labels:
+    app.kubernetes.io/name: app-service-frontend
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/instance: nginx-example
+spec:
+    containers:
+    - name: nginx-html
+      image: carmax-docker-local.jfrog.io/nginx-html:v1.1
+      ports:
+      - containerPort: 80
+      imagePullPolicy: Always
+    imagePullSecrets:
+      - name: deploy-token
