@@ -1,0 +1,76 @@
+# How to leverage services to expose pods and deployments.
+#   https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-intro/
+---
+apiVersion: v1
+# Kind of service is designated within spec below (ClusterIP (Default if not specified), NodePort, Loadbalancer, ExternalName)
+#  Note: LoadBalancer service will auto-assign an external IP.
+kind: Service
+metadata:
+  name: nginx-loadbalancer
+spec:
+  selector:
+    app.kubernetes.io/name: app-service-frontend
+  type: LoadBalancer
+  ports:
+    # Multi-port service is used below. This is best practice and standard when deploying kubernetes applications.
+    - name: http
+      protocol: TCP
+      # By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+      port: 80
+      targetPort: 80  # This is for demonstration, you can assign target port to whatever your service desires
+    - name: https
+      protocol: TCP
+      # By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+      port: 443
+      targetPort: 443  # This is for demonstration, you can assign target port to whatever your service desires
+
+
+---
+apiVersion: v1
+# Kind of service is designated within spec below (ClusterIP (Default if not specified), NodePort, Loadbalancer, ExternalName)
+kind: Service
+metadata:
+  name: nginx-clusterip
+spec:
+  selector:
+    app.kubernetes.io/name: app-service-frontend
+  ports:
+    # Multi-port service is used below. This is best practice and standard when deploying kubernetes applications.
+    - name: http
+      protocol: TCP
+      # By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+      port: 80
+      targetPort: 80  # This is for demonstration, you can assign target port to whatever your service desires
+    - name: https
+      protocol: TCP
+      # By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+      port: 443
+      targetPort: 443  # This is for demonstration, you can assign target port to whatever your service desires
+
+---
+apiVersion: v1
+# Kind of service is designated within spec below (ClusterIP (Default if not specified), NodePort, Loadbalancer, ExternalName)
+kind: Service
+metadata:
+  name: nginx-nodeport
+spec:
+  selector:
+    app.kubernetes.io/name: app-service-frontend
+  type: NodePort
+  ports:
+    # Multi-port service is used below. This is best practice and standard when deploying kubernetes applications.
+    - name: http
+      protocol: TCP
+      # By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+      port: 80
+      targetPort: 80  # This is for demonstration, you can assign target port to whatever your service desires
+      # Optional field
+      # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+      # Cannot be used when ClusterIP is designated with multi-port
+      nodePort: 30007  # A NodePort is essentially an assigned port redirect. This is useful when non-default ports are needed.
+    - name: https
+      protocol: TCP
+      # By default, and for convenience, the `targetPort` is set to the same value as the `port` field.
+      port: 443
+      targetPort: 443  # This is for demonstration, you can assign target port to whatever your service desires
+#      nodePort: 30007  # A NodePort is essentially an assigned port redirect. This is useful when non-default ports are needed.
