@@ -13,7 +13,7 @@ metadata:
 spec:
     containers:
     - name: nginx-html
-      image: carmax-docker-local.jfrog.io/nginx-html:v1.1
+      image: artifactory-local.jfrog.io/nginx-html:v1.1
       ports:
       - containerPort: 80
       imagePullPolicy: Always
